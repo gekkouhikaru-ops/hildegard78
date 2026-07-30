@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ヒルデガルト篇 - 軆羅帖</title>
+<style>
+  :root{
+    --ink:#12162b;
+    --night:#161b33;
+    --night-deep:#0c0f22;
+    --gold:#c9a227;
+    --gold-soft:#e3c463;
+    --viriditas:#3f7057;
+    --viriditas-bright:#5fa27c;
+    --wine:#7a2e2e;
+    --violet:#5b3a6e;
+    --parchment:#ede1c3;
+    --parchment-dim:#cfc3a1;
+    --air:#b9c7d6;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; height:100%;}
+  body{
+    background:
+      radial-gradient(ellipse at 50% -10%, #232a4d 0%, var(--night) 45%, var(--night-deep) 100%);
+    color:var(--parchment);
+    font-family: "Hiragino Mincho ProN","游明朝","Yu Mincho", serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow-x:hidden;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(237,225,195,.5) 0, transparent 100%),
+      radial-gradient(1px 1px at 80% 15%, rgba(237,225,195,.4) 0, transparent 100%),
+      radial-gradient(1px 1px at 35% 65%, rgba(237,225,195,.35) 0, transparent 100%),
+      radial-gradient(1.5px 1.5px at 65% 80%, rgba(237,225,195,.4) 0, transparent 100%),
+      radial-gradient(1px 1px at 92% 60%, rgba(237,225,195,.3) 0, transparent 100%),
+      radial-gradient(1px 1px at 15% 85%, rgba(237,225,195,.3) 0, transparent 100%);
+    pointer-events:none;
+    opacity:.8;
+  }
+  .stage{
+    width:100%;
+    max-width:520px;
+    padding:32px 22px 56px;
+    position:relative;
+    z-index:1;
+  }
+  .eyebrow{
+    text-align:center;
+    letter-spacing:.35em;
+    font-size:11px;
+    color:var(--gold-soft);
+    text-transform:uppercase;
+    margin-bottom:6px;
+    font-family: "Hiragino Mincho ProN", serif;
+  }
+  h1{
+    text-align:center;
+    font-size:26px;
+    font-weight:600;
+    letter-spacing:.12em;
+    margin:0 0 4px;
+    color:var(--parchment);
+  }
+  .subtitle{
+    text-align:center;
+    font-size:12.5px;
+    color:var(--parchment-dim);
+    letter-spacing:.08em;
+    margin-bottom:28px;
+  }
+
+  /* ---- Cosmic Egg ---- */
+  .egg-wrap{
+    display:flex; justify-content:center;
+    margin: 8px 0 26px;
+  }
+  svg#egg{ width:230px; height:230px; overflow:visible; }
+  .ring{ transition: opacity 900ms ease, filter 900ms ease; }
+  .ring-air{ fill:var(--air); opacity:.16; }
+  .ring-fire{ fill:var(--wine); opacity:.16; }
+  .ring-water{ fill:#3d5a73; opacity:.18; }
+  .ring-earth{ fill:var(--violet); opacity:.2; }
+  .core{ fill:var(--viriditas); opacity:.55; }
+  .core-glow{ fill:var(--viriditas-bright); opacity:.35; filter:blur(6px); }
+  @keyframes breathe{
+    0%,100%{ transform:scale(1); opacity:.35;}
+    50%{ transform:scale(1.12); opacity:.55;}
+  }
+  .core-glow{ animation: breathe 5s ease-in-out infinite; transform-origin:115px 115px; }
+
+  .card{
+    background: linear-gradient(180deg, rgba(237,225,195,.05), rgba(237,225,195,.02));
+    border:1px solid rgba(201,162,39,.28);
+    border-radius:2px;
+    padding:26px 22px;
+    position:relative;
+  }
+  .card::before, .card::after{
+    content:"";
+    position:absolute; width:9px; height:9px;
+    border:1px solid var(--gold);
+    opacity:.6;
+  }
+  .card::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
+  .card::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
+
+  p.lead{ font-size:14.5px; line-height:2; color:var(--parchment); margin:0 0 22px; }
+  p.lead .sig{ color:var(--gold-soft); }
+
+  button.primary{
+    display:block; width:100%;
+    background: linear-gradient(180deg, var(--gold), #a67f1c);
+    color:#1a1406;
+    border:none;
+    padding:14px 0;
+    font-size:14.5px;
+    letter-spacing:.15em;
+    font-family: "Hiragino Mincho ProN", serif;
+    font-weight:600;
+    cursor:pointer;
+    border-radius:1px;
+  }
+  button.ghost{
+    display:block; width:100%;
+    background:transparent;
+    color:var(--parchment-dim);
+    border:1px solid rgba(237,225,195,.3);
+    padding:12px 0;
+    font-size:13px;
+    letter-spacing:.12em;
+    font-family:"Hiragino Mincho ProN", serif;
+    margin-top:12px;
+    cursor:pointer;
+  }
+  button:active{ transform: translateY(1px); }
+
+  /* ---- progress ---- */
+  .progress{
+    display:flex; justify-content:center; gap:6px;
+    margin-bottom:22px;
+  }
+  .dot{ width:6px; height:6px; border-radius:50%; background:rgba(237,225,195,.22); transition: background 300ms; }
+  .dot.done{ background:var(--gold); }
+  .dot.now{ background:var(--parchment); }
+
+  .q-index{
+    text-align:center; font-size:11px; letter-spacing:.3em;
+    color:var(--parchment-dim); margin-bottom:10px;
+  }
+  .q-text{
+    text-align:center; font-size:16.5px; line-height:1.9;
+    margin:0 0 26px; color:var(--parchment);
+  }
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt{
+    text-align:left;
+    background:rgba(237,225,195,.04);
+    border:1px solid rgba(237,225,195,.18);
+    color:var(--parchment);
+    padding:14px 16px;
+    font-size:13.5px;
+    line-height:1.7;
+    font-family:"Hiragino Mincho ProN", serif;
+    cursor:pointer;
+    border-radius:1px;
+  }
+  .opt:active{ background:rgba(201,162,39,.18); border-color:var(--gold); }
+
+  /* ---- result ---- */
+  .element-name{
+    text-align:center; font-size:12px; letter-spacing:.3em; color:var(--gold-soft); margin-bottom:6px;
+  }
+  .type-name{
+    text-align:center; font-size:24px; font-weight:600; letter-spacing:.1em; margin-bottom:2px;
+  }
+  .type-sub{
+    text-align:center; font-size:12.5px; color:var(--parchment-dim); margin-bottom:22px; letter-spacing:.05em;
+  }
+  .section-label{
+    font-size:11px; letter-spacing:.25em; color:var(--gold-soft); margin: 22px 0 8px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-label::after{ content:""; flex:1; height:1px; background:rgba(201,162,39,.25); }
+  .desc{ font-size:14px; line-height:2; color:var(--parchment); }
+
+  .care-list{ list-style:none; padding:0; margin:10px 0 0; }
+  .care-list li{ font-size:13.5px; line-height:1.9; padding-left:16px; position:relative; margin-bottom:8px; color:var(--parchment); }
+  .care-list li::before{ content:"·"; position:absolute; left:0; color:var(--gold); }
+
+  .recipe-title{ font-size:15px; color:var(--gold-soft); letter-spacing:.05em; margin:8px 0 12px; }
+  .recipe-sub{ font-size:11px; letter-spacing:.2em; color:var(--parchment-dim); margin:14px 0 4px; }
+  .recipe-steps{ margin:8px 0 0; padding-left:20px; }
+  .recipe-steps li{ font-size:13.5px; line-height:1.9; color:var(--parchment); margin-bottom:8px; padding-left:4px; }
+
+  .closing{
+    margin-top:26px; padding-top:20px; border-top:1px solid rgba(201,162,39,.2);
+    font-size:13px; line-height:2.1; color:var(--parchment-dim); font-style:italic;
+  }
+
+  footer{
+    text-align:center; font-size:10px; letter-spacing:.2em; color:rgba(237,225,195,.3);
+    margin-top:26px;
+  }
+
+  .balance{ margin-top:6px; }
+  .balance-row{ display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+  .balance-label{ width:52px; font-size:12px; color:var(--parchment-dim); letter-spacing:.05em; flex-shrink:0; }
+  .balance-track{ flex:1; height:6px; background:rgba(237,225,195,.1); border-radius:3px; overflow:hidden; }
+  .balance-fill{ height:100%; border-radius:3px; width:0%; transition:width 900ms ease; }
+  .balance-fill.air{ background:linear-gradient(90deg,#8fa4b8,var(--air)); }
+  .balance-fill.fire{ background:linear-gradient(90deg,#5c2222,var(--wine)); }
+  .balance-fill.water{ background:linear-gradient(90deg,#2c4358,#3d5a73); }
+  .balance-fill.earth{ background:linear-gradient(90deg,#3d2650,var(--violet)); }
+  .balance-num{ width:34px; font-size:11.5px; color:var(--parchment-dim); text-align:right; flex-shrink:0; }
+  .note{ font-size:11px; color:rgba(237,225,195,.4); font-style:italic; margin-top:6px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="eyebrow">TAIRA-CHŌ · 軆羅帖</div>
+  <h1>ヒルデガルト篇</h1>
+  <div class="subtitle">Hildegard von Bingen — 緑の力と四つの気質</div>
+
+  <div class="egg-wrap">
+    <svg id="egg" viewBox="0 0 230 230">
+      <ellipse class="ring ring-air"   id="r-air"   cx="115" cy="115" rx="112" ry="108"/>
+      <ellipse class="ring ring-fire"  id="r-fire"  cx="115" cy="115" rx="90"  ry="86"/>
+      <ellipse class="ring ring-water" id="r-water" cx="115" cy="115" rx="66"  ry="63"/>
+      <ellipse class="ring ring-earth" id="r-earth" cx="115" cy="115" rx="42"  ry="40"/>
+      <circle class="core-glow" cx="115" cy="115" r="20"/>
+      <circle class="core" cx="115" cy="115" r="13"/>
+    </svg>
+  </div>
+
+  <!-- INTRO -->
+  <div id="screen-intro" class="card">
+    <p class="lead">十二世紀、ドイツの修道女<span class="sig">ヒルデガルト・フォン・ビンゲン</span>は、宇宙を一つの卵にたとえました。人の身体はその卵を映す小さな宇宙——四つの元素と四つの気質が織りなす、一人ひとり違う模様です。<br><br>
+    ここでは十の問いから、あなたの中で今どの気質が強く息づいているかを映し出し、あわせて<span class="sig">宝石療法とハーブ</span>——ヒルデガルトが説いた、その気質と付き合うための古くからの知恵をお伝えします。</p>
+    <button class="primary" onclick="start()">耳を澄まして聴く</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz" class="card" style="display:none;">
+    <div class="progress" id="progress"></div>
+    <div class="q-index" id="q-index"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="q-options"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screen-result" class="card" style="display:none;">
+    <div class="element-name" id="res-element"></div>
+    <div class="type-name" id="res-name"></div>
+    <div class="type-sub" id="res-sub"></div>
+
+    <div class="section-label">四元素の配分</div>
+    <div class="balance" id="res-balance"></div>
+
+    <div class="section-label">今のあなたの気質</div>
+    <div class="desc" id="res-desc"></div>
+
+    <div class="section-label">なぜ、この気質になるのか</div>
+    <div class="desc" id="res-cause"></div>
+
+    <div class="section-label">なりやすい心理の傾向</div>
+    <div class="desc" id="res-psych"></div>
+
+    <div class="section-label">陥りやすい不調の傾向</div>
+    <div class="desc" id="res-ailment"></div>
+    <div class="note">※ヒルデガルトの自然学における伝統的な捉え方であり、医学的な診断ではありません。体調に気になることがあるときは、医師にもご相談ください。</div>
+
+    <div class="section-label">セルフケアの手引き</div>
+    <ul class="care-list" id="res-care"></ul>
+
+    <div class="section-label">元素同士の相性・補い方</div>
+    <div class="desc" id="res-complement"></div>
+
+    <div class="section-label">宝石療法とハーブの手引き</div>
+    <div class="desc" id="res-gemstone"></div>
+    <div class="desc" id="res-herb" style="margin-top:10px;"></div>
+
+    <div class="section-label">あなたに合うレシピ</div>
+    <div class="recipe-title" id="recipe-title"></div>
+    <div class="recipe-sub">材料</div>
+    <ul class="care-list" id="recipe-ingredients"></ul>
+    <div class="recipe-sub">つくり方</div>
+    <ol class="recipe-steps" id="recipe-steps"></ol>
+
+    <div class="closing" id="res-closing"></div>
+
+    <button class="ghost" onclick="restart()">はじめから</button>
+  </div>
+
+  <footer>宇お連 · どうせ阿保なら踊らにゃ損々</footer>
+</div>
+
+<script>
+const TYPES = ["air","fire","water","earth"];
+const TYPE_INFO = {
+  air:   { jp:"サングイネウス", sub:"多血質・風の気質", ring:"r-air" },
+  fire:  { jp:"コレリクス",     sub:"胆汁質・火の気質", ring:"r-fire" },
+  water: { jp:"フレグマティクス", sub:"粘液質・水の気質", ring:"r-water" },
+  earth: { jp:"メランコリクス", sub:"憂鬱質・地の気質", ring:"r-earth" }
+};
+
+const DESC = {
+  air: "あなたの心は風のように軽やかに世界を巡り、人と交わることで輝きを増します。好奇心と明るさで場を満たす力を持ちながら、時にひとつの場所に根を下ろすことが難しく感じられるかもしれません。軽さはあなたの才能であり、同時に地に足をつける稽古が要る場所でもあります。",
+  fire: "あなたの中には燃える火があり、意志と行動力で物事を前に進めます。目的に向かって突き進む強さは周囲を導く力にもなりますが、燃え上がりすぎた炎は自分自身をも焦がします。火を消すのではなく、静かに燃やし続ける術を身につけるとき、その力は真に生きてきます。",
+  water: "あなたは水のように、人の痛みや喜びを自らのことのように受けとめる深い共感を持っています。流れに逆らわず調和する力は貴い一方、停滞すると心も体も重く沈みがちです。時に自ら流れを起こし、澱んだ水を動かす勇気が、あなたを軽くします。",
+  earth: "あなたは大地のように深く、物事の本質を見つめる力を持っています。芸術性と内省は他の誰にも真似できない実りを結びますが、重荷を一人で抱え込みやすく、孤独に沈みやすい面もあります。ヒルデガルトはこの気質をこそ、もっとも深い実りを結ぶ土地だと語りました。"
+};
+
+const CARE = {
+  air: ["朝の光を浴び、一日のリズムを整える","スペルト小麦など、穏やかに滋養を与える穀物を選ぶ","フェンネルやカモミールなど、心を鎮める香草を用いる","一つのことを最後までやり遂げる小さな習慣をつくる"],
+  fire: ["体を冷ます性質の食べ物(レタス、きゅうり)を取り入れる","月の光の下で静かに過ごす時間をつくる","バラの水や香りで、燃えすぎた心をなだめる","怒りが湧いたら、行動する前に一呼吸置く"],
+  water: ["生姜など体を温めるスパイスを日々の食に加える","軽い運動で、滞った流れを起こす","規則正しい生活のリズムで、心身を支える","決断を先延ばしにせず、小さな一歩から始める"],
+  earth: ["裸足で土や芝の上を歩き、大地とつながる","温かく栄養のある食事を、ひとりでなく誰かと囲む","日中、太陽の下で過ごす時間を意識してつくる","抱え込んだ思いを、言葉か紙に少しずつ出す"]
+};
+
+const CLOSING = {
+  air: "「風は形を持たぬゆえに、どこへでも至る」——あなたの軽やかさは、留まらぬからこそ多くを結びます。",
+  fire: "「火は闇を照らすために燃える」——あなたの情熱は、正しく灯されたとき、道しるべとなります。",
+  water: "「水は最も低きに流れ、すべてを潤す」——あなたの静かな深さは、気づかぬうちに多くの人を支えています。",
+  earth: "「土の中でこそ、種は最も豊かに実る」——あなたの内省は、いずれ誰も真似できない実りとなるでしょう。"
+};
+
+const CAUSE = {
+  air: "サングイネウスは、血液と空気の性質を多く受け継いだ気質だとヒルデガルトは説きました。軽やかに巡り、外へと向かう力が生まれつき強く、それゆえに新しい出会いや変化に心が開かれます。反面、一つの場所に長く留まる要素が少なく、根を張る感覚を意識して育てる必要がある生まれつきの傾向です。",
+  fire: "コレリクスは、黄胆汁と火の性質を多く受け継いだ気質です。熱と変容の力が生まれつき強く、意志を持って物事を動かす力に恵まれています。その火は他者を照らす力にもなりますが、燃える性質そのものは抑えるものではなく、正しく灯し続ける付き合い方を学ぶべき生まれつきの気質だとされました。",
+  water: "フレグマティクスは、粘液と水の性質を多く受け継いだ気質です。つなぎ、潤し、和らげる力に恵まれていますが、水はそのままでは低きに流れ、留まりやすい性質を持ちます。これは弱さではなく、自ら小さな流れを起こす工夫を必要とする、生まれつきの水の気質です。",
+  earth: "メランコリクスは、黒胆汁と土の性質を多く受け継いだ気質です。ヒルデガルトはこれを最も重く、しかし最も深く実る元素と考えました。深く根を張り、物事の本質を見つめる力の代わりに、心が沈みやすく、重荷を長く抱えやすい傾向が生まれつき備わっています。"
+};
+
+const PSYCH = {
+  air: "気分の波が表に出やすく、心変わりが早い一方で根に持つことは少ない傾向があります。刺激や変化がないと落ち着かなくなりやすく、一つの物事にじっくり向き合うことへの苦手意識、そして一人きりの静けさや退屈さに弱さを感じやすい面があります。",
+  fire: "苛立ちが早く湧きやすく、完璧を求めて自分にも他人にも厳しくなりがちです。負けず嫌いな面が強く出ることがあり、休むことに罪悪感を覚えやすい傾向があります。思い通りにいかないとき、その熱が内側に向かい自分を責める形に転じることもあります。",
+  water: "決断を先延ばしにしやすく、自分の気持ちより周りを優先しすぎる傾向があります。表立って感情を出さない分、気づかぬうちに疲れや不満を溜め込みやすく、無気力感や「流されている」感覚に陥りやすい面があります。",
+  earth: "物思いにふけりやすく、自己を厳しく見つめすぎる傾向があります。完璧を求めるあまり動き出せなくなったり、孤独感を強く感じやすかったりします。過去の出来事を何度も反芻し、心の重さが長く続きやすい面があります。"
+};
+
+const AILMENT = {
+  air: "眠りが浅くなりやすく、疲労の蓄積に自分で気づきにくい傾向があります。興奮や刺激のあとに、反動で急に気力が沈むことも。予定を詰め込みすぎることで、休息のリズムが乱れやすい点に注意が向けられてきました。",
+  fire: "緊張からくる肩や首のこわばり、頭に熱がこもるような不調が起こりやすいとされます。興奮した状態が続いたあと、糸が切れたように急激に消耗することも。熱を溜め込みすぎない工夫が伝統的に大切にされてきました。",
+  water: "むくみや冷え、体の重だるさが続きやすい傾向があるとされます。感情を溜め込みやすいことが、体の巡りの停滞につながるとヒルデガルトは考えました。滞りを感じたら、早めに小さく動かすことが伝統的に勧められています。",
+  earth: "消化の滞りや、肩や背中のこわばりが起こりやすいとされます。気分の落ち込みが長引きやすく、心の重さがそのまま体の重さにつながる傾向があるとヒルデガルトは説きました。日照と栄養、そして人とのつながりが伝統的に重んじられてきました。"
+};
+
+const COMPLEMENT = {
+  air: "風の軽やかさは、地の重みと組み合わさることで初めて地に足がつきます。土に触れる時間、同じ場所に留まり続ける小さな習慣を、意識して暮らしに取り入れてみてください。",
+  earth: "地の深さは、風の軽やかさを取り入れることで息苦しさから解放されます。景色を変える、誰かと軽やかに言葉を交わす——そんな風を、意識的に自分の中へ通してみてください。",
+  fire: "火の炎は、水の静けさによって初めて長く燃え続けられます。急かない時間、涙を流したり感情をそのまま感じきったりできる場所を、自分に許してあげてください。",
+  water: "水の静けさは、火の熱によって澱みから解放されます。小さな挑戦や、体をしっかり動かす機会が、あなたの中に眠る流れを取り戻すきっかけになります。"
+};
+
+const COMPLEMENT_OF = { air:"earth", earth:"air", fire:"water", water:"fire" };
+const ELEMENT_JP = { air:"風", fire:"火", water:"水", earth:"地" };
+
+const GEMSTONE = {
+  air: "ヒルデガルトはジャスパー(碧玉)を、散りやすい心を一つに集め、恐れを鎮める石として尊びました。ペンダントやブレスレットとして肌の近くに身につけると、軽やかな風の気質に静かな重みが添えられると伝わります。",
+  fire: "ヒルデガルトはサファイアを、あらゆる石の中でもっとも澄んだ石とし、燃えすぎた心と目の疲れを鎮めると説きました。額や胸元に近い場所で身につけると、火照りを静める助けになるとされています。",
+  water: "ヒルデガルトは赤みを帯びた石に、滞った血と気力を巡らせる力を見ました。カーネリアン(紅玉髄)を身につける、あるいは手に取って眺めることは、停滞しがちな水の気質にそっと熱を灯します。",
+  earth: "ヒルデガルトはアメジスト(紫水晶)を、暗い思いや憂うつを退け、心を澄ませる石として重んじました。眠る前に枕元に置く、あるいは肌身離さず持つことで、沈みやすい心に光をともすと伝えられています。"
+};
+
+const HERB = {
+  air: "ヒルデガルトはフェンネル(ウイキョウ)を「喜びをもたらし、心を清める」薬草として繰り返し称えました。消化を助け、心の散らかりを鎮める力があるとされ、風の気質にとりわけ相性の良い一種です。",
+  fire: "ヒルデガルトは「心臓の喜び」と呼び、レモンバーム(メリッサ)を燃えすぎた心を鎮め、穏やかな明るさを取り戻す薬草として重んじました。火の気質の昂りを静かに冷ますとされています。",
+  water: "ヒルデガルトが数ある薬草の中でもとりわけ称賛したのがガランガル(ガリンガルの根)です。冷えて滞りがちな心身に、内側から温もりを灯し、生きる喜びを呼び戻す力があると説かれました。",
+  earth: "ヒルデガルトはナツメグ(ニクズク)を、憂うつを退け、心に明るさと聡明さをもたらす薬草として大切にしました。少量を日々の食に取り入れることで、沈みがちな心に穏やかな灯をともすとされています。"
+};
+
+const RECIPE = {
+  air: {
+    title: "フェンネルとカモミールの静心茶",
+    ingredients: ["フェンネルシード 小さじ1", "カモミール(ドライ) 小さじ1", "熱湯 200ml", "(お好みで)はちみつ 少々"],
+    steps: ["フェンネルシードを軽く指で潰す", "カモミールと共にポットに入れ、熱湯を注ぐ", "蓋をして5分ほど蒸らし、こして飲む", "一日の終わり、心が散らかっていると感じる夜に"]
+  },
+  fire: {
+    title: "レモンバームとバラの鎮心茶",
+    ingredients: ["乾燥レモンバーム 小さじ1", "乾燥バラの花びら 小さじ1", "熱湯 200ml"],
+    steps: ["ポットに乾燥レモンバームとバラの花びらを入れる", "熱湯を注ぎ、蓋をして5分蒸らす", "こして、ゆっくりと時間をかけて飲む", "苛立ちや興奮を感じた日の夜、休む前に"]
+  },
+  water: {
+    title: "ガランガルと生姜の温もり茶",
+    ingredients: ["生姜(薄切り) 2〜3枚", "ガランガルパウダー、または根(あれば少量)", "熱湯 200ml", "(お好みで)はちみつ 少々"],
+    steps: ["生姜とガランガルを耐熱カップに入れる", "熱湯を注ぎ、5分ほど蒸らす", "はちみつを加えて味を整える", "体が重だるく感じる朝、目覚めの一杯として"]
+  },
+  earth: {
+    title: "ヒルデガルトのナツメグクッキー",
+    ingredients: ["全粒粉またはスペルト小麦粉 100g", "ナツメグパウダー 小さじ1", "シナモンパウダー 小さじ1/2", "バター 40g", "はちみつ(または砂糖) 30g", "卵 1/2個分"],
+    steps: ["バターと甘みをよく混ぜ、卵を加える", "粉類とスパイスをふるい入れ、生地をまとめる", "薄く伸ばして好きな形に抜く", "170℃のオーブンで12〜15分焼く", "心が沈みがちな午後、ひと呼吸置くお供に"]
+  }
+};
+
+const QUESTIONS = [
+  { text:"朝目覚めたとき、心はどんな感じ？", opts:[
+    {t:"air", label:"すぐに世界へ興味が向き、あれこれ考え始める"},
+    {t:"fire", label:"やる気に満ち、すぐ動き出したくなる"},
+    {t:"water", label:"ゆっくりと、静かに現実へ戻ってくる"},
+    {t:"earth", label:"重さを感じながらも、じっくりと一日を思う"}
+  ]},
+  { text:"人と話しているとき、あなたは", opts:[
+    {t:"air", label:"話題が次々に広がり、会話そのものを楽しむ"},
+    {t:"fire", label:"自分の意見をはっきりと伝える"},
+    {t:"water", label:"相手の話をじっくり聞き、共感する"},
+    {t:"earth", label:"深く考えてから、慎重に言葉を選ぶ"}
+  ]},
+  { text:"怒りを感じたとき", opts:[
+    {t:"air", label:"すぐ表に出るが、すぐに忘れてしまう"},
+    {t:"fire", label:"強く燃え上がり、行動に移したくなる"},
+    {t:"water", label:"表には出さず、内側にそっと留める"},
+    {t:"earth", label:"長く心に残り、何度も思い返してしまう"}
+  ]},
+  { text:"新しいことを始めるとき", opts:[
+    {t:"air", label:"わくわくして、すぐに飛びつく"},
+    {t:"fire", label:"目標を定め、まっすぐ突き進む"},
+    {t:"water", label:"様子を見ながら、慎重に始める"},
+    {t:"earth", label:"じっくり計画を練ってから動く"}
+  ]},
+  { text:"疲れたときに欲しいもの", opts:[
+    {t:"air", label:"誰かと話して、気を紛らわせたい"},
+    {t:"fire", label:"体を動かして発散したい"},
+    {t:"water", label:"ただゆっくり休みたい"},
+    {t:"earth", label:"一人で静かに過ごしたい"}
+  ]},
+  { text:"あなたの得意なこと", opts:[
+    {t:"air", label:"場を明るくすること"},
+    {t:"fire", label:"物事を推し進めること"},
+    {t:"water", label:"人を支え、癒すこと"},
+    {t:"earth", label:"深く考え、何かを生み出すこと"}
+  ]},
+  { text:"あなたの苦手なこと", opts:[
+    {t:"air", label:"一つのことに集中し続けること"},
+    {t:"fire", label:"我慢すること"},
+    {t:"water", label:"決断すること"},
+    {t:"earth", label:"気持ちを軽く手放すこと"}
+  ]},
+  { text:"心惹かれる季節や時間帯", opts:[
+    {t:"air", label:"風の吹く春の朝"},
+    {t:"fire", label:"太陽が高い夏の昼"},
+    {t:"water", label:"静かな雨の午後"},
+    {t:"earth", label:"深まる秋の夜"}
+  ]},
+  { text:"心が乱れたときの対処", opts:[
+    {t:"air", label:"場所を変えて、気分を変える"},
+    {t:"fire", label:"体を動かしてエネルギーを発散する"},
+    {t:"water", label:"涙を流すなど、静かに感じきる"},
+    {t:"earth", label:"一人で考え、意味を探す"}
+  ]},
+  { text:"理想とする生き方", opts:[
+    {t:"air", label:"軽やかに、自由に"},
+    {t:"fire", label:"力強く、目的を持って"},
+    {t:"water", label:"穏やかに、調和して"},
+    {t:"earth", label:"深く、意味を持って"}
+  ]}
+];
+
+let qi = 0;
+let scores = { air:0, fire:0, water:0, earth:0 };
+
+function start(){
+  document.getElementById('screen-intro').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderQuestion();
+}
+
+function renderProgress(containerId, index, total){
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  for(let i=0;i<total;i++){
+    const d = document.createElement('div');
+    d.className = 'dot' + (i<index ? ' done' : (i===index ? ' now' : ''));
+    el.appendChild(d);
+  }
+}
+
+function renderQuestion(){
+  renderProgress('progress', qi, QUESTIONS.length);
+  document.getElementById('q-index').textContent = (qi+1) + ' / ' + QUESTIONS.length;
+  const q = QUESTIONS[qi];
+  document.getElementById('q-text').textContent = q.text;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  q.opts.forEach(o=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.textContent = o.label;
+    b.onclick = ()=> answer(o.t);
+    optsEl.appendChild(b);
+  });
+}
+
+function answer(type){
+  scores[type]++;
+  qi++;
+  if(qi < QUESTIONS.length){
+    renderQuestion();
+  } else {
+    document.getElementById('screen-quiz').style.display = 'none';
+    showResult();
+  }
+}
+
+function showResult(){
+  document.getElementById('screen-result').style.display = 'block';
+
+  let dominant = TYPES[0];
+  TYPES.forEach(t=>{ if(scores[t] > scores[dominant]) dominant = t; });
+
+  const info = TYPE_INFO[dominant];
+  document.getElementById('res-element').textContent = info.sub;
+  document.getElementById('res-name').textContent = info.jp;
+  document.getElementById('res-sub').textContent = '軆羅帖 ヒルデガルト篇 — 診断結果';
+  document.getElementById('res-desc').textContent = DESC[dominant];
+  document.getElementById('res-cause').textContent = CAUSE[dominant];
+  document.getElementById('res-psych').textContent = PSYCH[dominant];
+  document.getElementById('res-ailment').textContent = AILMENT[dominant];
+
+  const careEl = document.getElementById('res-care');
+  careEl.innerHTML = '';
+  CARE[dominant].forEach(c=>{
+    const li = document.createElement('li');
+    li.textContent = c;
+    careEl.appendChild(li);
+  });
+
+  const complementType = COMPLEMENT_OF[dominant];
+  document.getElementById('res-complement').textContent =
+    COMPLEMENT[dominant] + '(補い合う元素:' + ELEMENT_JP[complementType] + ')';
+
+  document.getElementById('res-closing').textContent = CLOSING[dominant];
+
+  // element balance bars
+  const totalAnswers = QUESTIONS.length;
+  const balanceEl = document.getElementById('res-balance');
+  balanceEl.innerHTML = '';
+  TYPES.forEach(t=>{
+    const pctT = Math.round((scores[t] / totalAnswers) * 100);
+    const row = document.createElement('div');
+    row.className = 'balance-row';
+    row.innerHTML =
+      '<div class="balance-label">' + ELEMENT_JP[t] + ' ' + TYPE_INFO[t].jp.slice(0,3) + '</div>' +
+      '<div class="balance-track"><div class="balance-fill ' + t + '" id="bal-' + t + '"></div></div>' +
+      '<div class="balance-num">' + pctT + '%</div>';
+    balanceEl.appendChild(row);
+  });
+  setTimeout(()=>{
+    TYPES.forEach(t=>{
+      const pctT = Math.round((scores[t] / totalAnswers) * 100);
+      document.getElementById('bal-' + t).style.width = pctT + '%';
+    });
+  }, 100);
+
+  document.getElementById('res-gemstone').textContent = GEMSTONE[dominant];
+  document.getElementById('res-herb').textContent = HERB[dominant];
+
+  const recipe = RECIPE[dominant];
+  document.getElementById('recipe-title').textContent = recipe.title;
+  const ingEl = document.getElementById('recipe-ingredients');
+  ingEl.innerHTML = '';
+  recipe.ingredients.forEach(i=>{
+    const li = document.createElement('li');
+    li.textContent = i;
+    ingEl.appendChild(li);
+  });
+  const stepEl = document.getElementById('recipe-steps');
+  stepEl.innerHTML = '';
+  recipe.steps.forEach(s=>{
+    const li = document.createElement('li');
+    li.textContent = s;
+    stepEl.appendChild(li);
+  });
+
+  // light up the dominant ring, dim the others
+  TYPES.forEach(t=>{
+    const ring = document.getElementById(TYPE_INFO[t].ring);
+    if(t === dominant){
+      ring.style.opacity = '.85';
+      ring.style.filter = 'drop-shadow(0 0 10px currentColor)';
+    } else {
+      ring.style.opacity = '.08';
+    }
+  });
+}
+
+function restart(){
+  qi = 0;
+  scores = { air:0, fire:0, water:0, earth:0 };
+  TYPES.forEach(t=>{
+    const ring = document.getElementById(TYPE_INFO[t].ring);
+    ring.style.opacity = '';
+    ring.style.filter = '';
+  });
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-intro').style.display = 'block';
+}
+</script>
+</body>
+</html>
