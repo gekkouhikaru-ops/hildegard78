@@ -1,4 +1,4 @@
-content://downloads/all_downloads/2427<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -84,9 +84,29 @@ content://downloads/all_downloads/2427<!DOCTYPE html>
   /* ---- Cosmic Egg ---- */
   .egg-wrap{
     display:flex; justify-content:center;
-    margin: 8px 0 26px;
+    margin: 8px 0 10px;
+    position:relative;
   }
   svg#egg{ width:230px; height:230px; overflow:visible; }
+  .illust-circle{
+    position:absolute; top:50%; left:50%;
+    width:176px; height:176px; border-radius:50%;
+    transform:translate(-50%,-50%);
+    object-fit:cover;
+    box-shadow: 0 0 0 1px rgba(201,162,39,.5), 0 0 18px rgba(0,0,0,.5);
+    display:none;
+  }
+  .illust-slot{
+    display:flex; justify-content:center; align-items:center; gap:8px;
+    margin-bottom:22px;
+  }
+  .illust-btn{
+    background:transparent; border:1px solid rgba(201,162,39,.4);
+    color:var(--gold-soft); font-size:11.5px; letter-spacing:.1em;
+    padding:7px 14px; border-radius:20px; cursor:pointer;
+    font-family:"Hiragino Mincho ProN", serif;
+  }
+  .illust-btn.remove{ border-color:rgba(237,225,195,.25); color:var(--parchment-dim); }
   .ring{ transition: opacity 900ms ease, filter 900ms ease; }
   .ring-air{ fill:var(--air); opacity:.16; }
   .ring-fire{ fill:var(--wine); opacity:.16; }
@@ -242,7 +262,13 @@ content://downloads/all_downloads/2427<!DOCTYPE html>
       <circle class="core-glow" cx="115" cy="115" r="20"/>
       <circle class="core" cx="115" cy="115" r="13"/>
     </svg>
+    <img id="illust-img" class="illust-circle" alt="">
   </div>
+  <div class="illust-slot">
+    <button class="illust-btn" id="illust-add" onclick="document.getElementById('illust-input').click()">＋ イラストを追加</button>
+    <button class="illust-btn remove" id="illust-remove" style="display:none;" onclick="removeIllustration()">はずす</button>
+  </div>
+  <input type="file" accept="image/*" id="illust-input" style="display:none;" onchange="handleIllustration(event)">
 
   <!-- INTRO -->
   <div id="screen-intro" class="card">
@@ -469,6 +495,44 @@ const QUESTIONS = [
 
 let qi = 0;
 let scores = { air:0, fire:0, water:0, earth:0 };
+
+function handleIllustration(evt){
+  const file = evt.target.files && evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    setIllustration(e.target.result);
+    try{ localStorage.setItem('taira_hildegard_illust', e.target.result); }catch(err){}
+  };
+  reader.readAsDataURL(file);
+}
+
+function setIllustration(dataUrl){
+  const img = document.getElementById('illust-img');
+  img.src = dataUrl;
+  img.style.display = 'block';
+  document.getElementById('illust-add').textContent = '＋ 差し替える';
+  document.getElementById('illust-remove').style.display = 'inline-block';
+}
+
+function removeIllustration(){
+  const img = document.getElementById('illust-img');
+  img.src = '';
+  img.style.display = 'none';
+  document.getElementById('illust-add').textContent = '＋ イラストを追加';
+  document.getElementById('illust-remove').style.display = 'none';
+  document.getElementById('illust-input').value = '';
+  try{ localStorage.removeItem('taira_hildegard_illust'); }catch(err){}
+}
+
+(function loadSavedIllustration(){
+  try{
+    const saved = localStorage.getItem('taira_hildegard_illust');
+    if(saved){
+      document.addEventListener('DOMContentLoaded', function(){ setIllustration(saved); });
+    }
+  }catch(err){}
+})();
 
 function start(){
   document.getElementById('screen-intro').style.display = 'none';
